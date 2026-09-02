@@ -26,4 +26,4 @@ Add the Timer to your dashboard and configure. Select the Timer and configure as
 
 **Example**:
 
-<img width="306" height="230" alt="Screenshot 2026-04-03 102040" src="https://github.com/user-attachments/assets/d86ac4dc-83f9-4ddc-94f2-386549872a0d" />
+<img width="283" height="74" alt="Screenshot 2026-09-02 145739" src="https://github.com/user-attachments/assets/c15fd587-d05d-4182-860d-f03f679c11d4" />
