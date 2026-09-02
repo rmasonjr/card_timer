@@ -13,7 +13,7 @@ Setup -> General -> "Create Devices for Counters and Timers"
 
 If you decide to use "Tap to Reset", you must first create an event to reset your timer. Something similar to:
 
-
+<img width="868" height="252" alt="Screenshot 2026-09-02 145112" src="https://github.com/user-attachments/assets/662c6de2-744f-4ee2-ab00-4c9f44438989" />
 
 **Installation**: Download the card_timer.zip file attachment from my github.
 Go into Edit mode on your dashboard, and click the '+' button on the bottom right.
