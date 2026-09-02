@@ -11,6 +11,10 @@ For this reason, the card can be updated every :15 minutes (default) or any othe
 When you create your HS4 timer, make sure you create a corresponding HS4 device.  You can verify this in 
 Setup -> General -> "Create Devices for Counters and Timers"
 
+If you decide to use "Tap to Reset", you must first create an event to reset your timer. Something similar to:
+
+
+
 **Installation**: Download the card_timer.zip file attachment from my github.
 Go into Edit mode on your dashboard, and click the '+' button on the bottom right.
 Click the Upload Card button on the top right and upload the card_timer.zip file you just downloaded.
