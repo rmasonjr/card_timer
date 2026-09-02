@@ -1,9 +1,9 @@
 {{#Name=Timer}}
 {{#Description=Animated Timer with optional Tap-to-Reset. Font-Awesome icon is animated when timer changes. User settings to control update interval.}}
-{{#Version=1.0}}
+{{#Version=1.2}}
 {{#Author=rmasonjr}}
-{{#CanBeDeleted=False}}
-{{#SaveList=save_title_color,save_title_size,save_title_bold,save_poll_mins,save_text_color,save_text_size,save_text_bold,save_fa_icon,save_icon_size,save_lastchange_color,save_lastchange_size,save_lastchange_display}}
+{{#CanBeDeleted=True}}
+{{#SaveList=save_tap_to_reset,save_tap_event,save_title_color,save_title_size,save_title_bold,save_poll_mins,save_text_color,save_text_size,save_text_bold,save_fa_icon,save_icon_size,save_lastchange_color,save_lastchange_size,save_lastchange_display}}
 
 {{includefileraw Dashboards/Cards/Custom/Common/CommonHeader.html}}
 
@@ -11,6 +11,12 @@
 
 {{sections[index]="Settings"}}
 {{poll_mins=get_value 'save_poll_mins' '15' 'Update Every (mins)' 'text'}}
+{{tap_to_reset=get_value 'save_tap_to_reset' '' 'Tap to Reset?' 'toggle'}}
+{{tap_event=get_value 'save_tap_event' '' 'Event to Trigger on Tap' 'event'}}
+{{if tap_event==''
+	tap_event='0'
+end}}
+{{tap_event_setting_index=index-1}}
 
 {{sections[index]="Timer Name"}}
 {{title_color=get_value 'save_title_color' '#FFFFFF' 'Color' 'color'}}
@@ -18,7 +24,7 @@
 {{title_bold=get_value 'save_title_bold' '' 'Bold' 'toggle'}}
 
 {{sections[index]="Timer Value Display"}}
-{{text_color=get_value 'save_text_color' '#FFFFFF' 'Text Color' 'color'}}
+{{text_color=get_value 'save_text_color' '#000000' 'Text Color' 'color'}}
 {{text_size=get_value 'save_text_size' '18' 'Text Size (px)' 'text'}}
 {{text_bold=get_value 'save_text_bold' '' 'Bold' 'toggle'}}
 
@@ -28,6 +34,18 @@
 
 {{#get settings that will not be configured with the settings dialog}}
 {{# these are values that may or may not be displayed in the setings dialog but need to be displayed with custom HTML that the autogen code cannot handle }}
+{{event_list=[]}}
+{{event_name_list=[]}}
+{{event_index=0}}
+{{for ev in events}}
+	{{group=ev.name}}
+	{{for item in ev.events}}
+		{{event_list[event_index]=item.ev_ref}}
+		{{event_name_list[event_index]='[' | string.append group | string.append ']-' | string.append item.name}}
+		{{event_index=event_index+1}}
+	{{end}}
+{{end}}
+{{current_values[tap_event_setting_index]=tap_event}}
 {{feature_item_ref=get_saved_value 'save_feature_item' widget_id}}
 {{if feature_item_ref==''
 	feature_item_ref='0'
@@ -62,6 +80,9 @@ end}}
     .timer-text{{w.id}} {
             display: flex;
             flex-direction: column;
+		    flex: 1;
+		    align-self: stretch;
+		    justify-content: space-between;
     	}
     .timer-title{{w.id}} {
             font-size: {{title_size}}px;
@@ -75,6 +96,13 @@ end}}
 				font-weight: bold;
 			{{end}}
     	}
+    .timer-status-row{{w.id}} {
+            display: flex;
+            align-items: flex-end;
+            justify-content: space-between;
+            width: 100%;
+            gap: 8px;
+    	}
     .timer-last-change-text{{w.id}} {
             display: flex;
             flex-direction: column;
@@ -82,8 +110,12 @@ end}}
     .timer-last-change{{w.id}} {
             color: {{lastchange_color}};
             font-size: {{lastchange_size}}px;
-            align-items: right;
+		    align-self: flex-end;
             text-align: right;
+			    padding-right: 14px;
+			    padding-bottom: 0;
+			    margin-left: auto;
+			    white-space: nowrap;
     	}
     @keyframes spin-animation {
         from { transform: rotate(0deg); }
@@ -97,20 +129,27 @@ end}}
 {{dev=device_by_ref feature_item_ref}}
 {{device_val = device_value feature_item_ref}}
 
+{{#Begin main card area}}
+
 <div class="container{{w.id}}">
+	
 	{{if feature_item_ref=='0'}}
 		<div class="no-feature">No timer device selected</div>
 	{{else}}
-		<div class="timer-card{{w.id}}">
+		<div class="timer-card{{w.id}}" {{if tap_to_reset=='on'}}{{if !dbs.edit_mode}}onclick="timerTap{{id_unique}}();"{{end}}{{end}}>
 			<div class="timer-icon-div{{w.id}}">
 				<i class="{{fa_icon}}" id="icon" title="Reset Counter"></i>
 			</div>
 			<div class="timer-text{{w.id}}">
 				<div class="timer-title{{w.id}}">{{dev.name}}</div>
-				<div class="timer-state{{w.id}}">
-					<span class="mr-2" id="timer-state{{w.id}}">DD HH MM</span>
+				<div class="timer-status-row{{w.id}}">
+					<div class="timer-state{{w.id}}">
+						<span class="mr-2" id="timer-state{{w.id}}">DD HH MM</span>
+					</div>
+					{{if tap_to_reset=='on'}}
+						<small class="timer-last-change{{w.id}}">Tap to Reset</small>
+					{{end}}
 				</div>
-				<!-- <small class="text-muted timer-last-change{{w.id}}">Tap to Reset</small> -->
 			</div>
 	{{end}}
 		</div>
@@ -206,6 +245,20 @@ end}}
 											  </label>
 											</span>						
 										</div>		
+									{{else if control_types[index] == 'event'}}
+									<div class="col-md-3 justify-content-center align-content-center">
+										{{titles[index]}}
+									</div>
+									<div class="col-md md-form input-group justify-content-center">
+										<select class="mdb-select md-form mx-2" id="tap_event_select{{w.id}}" name="{{sn}}" {{if tap_to_reset=='on'}}{{else}}disabled{{end}}>
+											<option value=""></option>
+											{{event_option_index=0}}
+											{{for event_name in event_name_list}}
+												<option value="{{event_option_index}}" {{if tap_event==event_option_index}}selected{{end}}>{{event_name}}</option>
+												{{event_option_index=event_option_index+1}}
+											{{end}}
+										</select>
+									</div>
 									{{else if control_types[index] == 'text'}}
                                     <div class="col-md justify-content-center align-content-center">
                                         {{titles[index]}}               
@@ -307,6 +360,18 @@ $(document).ready(function () {
 		$('#control_select1{{w.id}}').materialSelect();
 		$('#control_select2{{w.id}}').materialSelect();
 	{{end}}
+	$('#tap_event_select{{w.id}}').materialSelect();
+	function updateTapEventSelect{{id_unique}}(enabled) {
+		var $select = $('#tap_event_select{{w.id}}');
+		$select.materialSelect({destroy: true});
+		$select.prop('disabled', !enabled);
+		$select.materialSelect();
+	}
+	var $tapReset = $('input[name="save_tap_to_reset"]');
+	updateTapEventSelect{{id_unique}}($tapReset.is(':checked'));
+	$tapReset.on('change', function () {
+		updateTapEventSelect{{id_unique}}(this.checked);
+	});
 });
 
 function addFeature{{id_unique}}() {
@@ -434,7 +499,7 @@ function parseTimeString(timeStr) {
 	// "01:02" = MM:SS
 	// "03:04:05" = HH:MM:SS
 	// "999:23:15:04" = DD:HH:MM:SS
-	
+	console.log("parseTimeString:  input = " + timeStr);
 	var parts = timeStr.split(':');
 	var days = 0, hours = 0, minutes = 0, seconds = 0;
 	
@@ -461,6 +526,37 @@ function parseTimeString(timeStr) {
 		minutes: minutes,
 		seconds: seconds
 	};
+}
+
+function timerTap{{id_unique}}() {
+	var modal = $('<div class="modal fade pg-show-modal" id="timer-confirm{{id_unique}}" tabindex="-1" role="dialog" aria-hidden="true">' +
+		'<div class="modal-dialog modal-dialog-centered" role="document">' +
+		'<div class="modal-content">' +
+		'<div class="modal-header"><h5 class="modal-title">Reset This Timer?</h5></div>' +
+		'<div class="modal-footer">' +
+		'<button type="button" class="btn btn-secondary" data-dismiss="modal">No</button>' +
+		'<button type="button" class="btn btn-primary" id="timer-confirm-yes{{id_unique}}">Yes</button>' +
+		'</div></div></div></div>');
+
+	$('body').append(modal);
+	modal.on('hidden.bs.modal', function () {
+		modal.remove();
+	});
+	modal.find('#timer-confirm-yes{{id_unique}}').on('click', function () {
+		$.ajax({
+			type: "POST",
+			url: '/dashboard.html',
+			data: 'action=run_event&ref={{event_list[tap_event]}}',
+			cache: false,
+			success: function () {
+				setTimeout(function () {
+					getStatusPeriodic{{id_unique}}();
+				}, 1000);
+			}
+		});
+		modal.modal('hide');
+	});
+	modal.modal('show');
 }
 
 </script>
