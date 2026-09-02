@@ -22,8 +22,11 @@ Add the Timer to your dashboard and configure. Select the Timer and configure as
 
 **Configuration**:
 
-​<img width="459" height="841" alt="Screenshot 2026-04-03 104645" src="https://github.com/user-attachments/assets/4a7fefea-5e69-4e2f-a6e8-a6a7f0e1c99d" />
+<img width="430" height="788" alt="Screenshot 2026-09-02 145927" src="https://github.com/user-attachments/assets/d6703aa8-fda6-4f33-ae4c-1c9d8b360182" />
+
 
 **Example**:
 
 <img width="283" height="74" alt="Screenshot 2026-09-02 145739" src="https://github.com/user-attachments/assets/c15fd587-d05d-4182-860d-f03f679c11d4" />
+<img width="471" height="139" alt="Screenshot 2026-09-02 145834" src="https://github.com/user-attachments/assets/9b0c470a-e5ec-487b-86ae-3bd57ec050fd" />
+
